@@ -3,6 +3,8 @@
 A Devops Learning App
 
 Testing the branch rules
+`
+Testing branch rule after creating branch rules for "main" branch
 
 ## About the Application
 
