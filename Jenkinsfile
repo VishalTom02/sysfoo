@@ -27,10 +27,34 @@ pipeline {
     }
 
     stage('package') {
-      steps {
-        echo 'package maven app'
-        sh 'mvn package -DskipTests'
-        archiveArtifacts 'target/*.jar'
+      when {
+        branch "main"
+      }
+      parallel {
+        stage('package') {
+          steps {
+            echo 'package maven app'
+            sh 'mvn package -DskipTests'
+            archiveArtifacts 'target/*.jar'
+          }
+        }
+
+        stage('Docker BnP') {
+          agent any
+          steps {
+            script {
+              docker.withRegistry('https://index.docker.io/v1/', 'dockerloginstep') {
+                def commitHash = env.GIT_COMMIT.take(7)
+                def dockerImage = docker.build("vishaltom02/sysfoo:${commitHash}", "./")
+                dockerImage.push()
+                dockerImage.push("latest")
+                dockerImage.push("dev")
+              }
+            }
+
+          }
+        }
+
       }
     }
 
